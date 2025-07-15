@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 
 
 import rateLimiter from "./middleware/rateLimiter.js";
@@ -12,14 +13,16 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001 
+const __dirname = path.resolve();
 
-
-
+//in development we have two different domains in production we have one domain
+if (process.env.NODE_ENV !== "production") {
 app.use(
     cors({
         origin: "http://localhost:5173",
 })
 );
+}
 //middle ware runs btw the req and res
 app.use(express.json());  // just before res the middleware executes like req.body to get input
 
@@ -36,6 +39,18 @@ app.use("/api/notes",noteRoutes);
 // app.use("/api/products",productRoutes);
 // app.use("/api/payments",paymentRoutes);
 // app.use("/api/emails",emailsRoutes);
+
+app.use(express.static(path.join(__dirname,"../Frontend/dist")));
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
+}
+
+
 
 connectDB().then(() => {
     app.listen(PORT, () => {
