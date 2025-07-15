@@ -1,0 +1,17 @@
+// it is also a type of db (redis)
+
+import {Ratelimit} from "@upstash/ratelimit";
+import {Redis} from "@upstash/redis";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+//create a ratelimiter that allows 10 requests per 20 sec
+const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),  // taking redis keys from .env
+    limiter: Ratelimit.slidingWindow(10,"20 s"),
+});
+
+//created an instance(blue print) and sending it
+
+export default ratelimit;
